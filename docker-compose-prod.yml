@@ -1,0 +1,37 @@
+version: "3"
+services: 
+    api:
+        #image name is the name of the repository
+        image: jordan0902/fastapi
+        #start up the service before this service.
+        depends_on:
+            - postgres
+        ports:
+            #<port on localhost>:<port on container>
+            - 80: 8000
+        #save the changes from the develop folder into the container folder    
+        volumes:
+            - ./:/usr/src/app:ro # ro: read-only mode for security
+        command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+        # env_file:
+        #     - ./.env
+        environment:
+            - DATABASE_HOSTNAME=${DATABASE_HOSTNAME}
+            - DATABASE_PORT=${DATABASE_PORT}
+            - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+            - DATABASE_NAME=${DATABASE_NAME}
+            - DATABASE_USERNAME=${DATABASE_USERNAME}
+            - SECRET_KEY=${SECRET_KEY}
+            - ALGORITHM=${ALGORITHM}
+            - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
+    postgres:
+        image: postgres
+        environment:
+            - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+            - POSTGRES_DB=${DATABASE_NAME}
+
+        volumes:
+            - postgres-db:/var/lib/postgressql/data
+
+volumes:
+    postgres-db:
